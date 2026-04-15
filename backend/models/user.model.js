@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-import { jwt } from "jsonwebtoken"
+import  jwt  from "jsonwebtoken"
 const userSchema = new mongoose.Schema({
     name:{
         type:String,
@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema({
     email:{
         type:String,
         required:true,
-        unique:true
+        unique:true,
+        lowercase:true
     },
     password:{
         type:String,
@@ -32,6 +33,9 @@ const userSchema = new mongoose.Schema({
     updatedBy:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
+    },
+    refreshToken: {
+    type: String
     }
 
 },{timestamps:true})

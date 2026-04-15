@@ -23,6 +23,14 @@ app.use("/api/v1/user" , userRouter)
 app.listen(PORT , ()=>{
     console.log(`server is running at port ${PORT}`)
 })
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+        errors: err.errors || []
+    });
+});
 
 
 
