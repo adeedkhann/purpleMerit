@@ -3,7 +3,7 @@ import cors from "cors"
 import dotenv from "dotenv"
 dotenv.config()
 import connectDb from "./database/connectDb.js"
-
+import userRouter from "./routes/user.route.js"
 
 
 connectDb();
@@ -16,6 +16,10 @@ const PORT = process.env.PORT || 4000;
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
+
+
+app.use("/api/v1/user" , userRouter)
+
 app.listen(PORT , ()=>{
     console.log(`server is running at port ${PORT}`)
 })
