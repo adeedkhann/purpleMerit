@@ -4,18 +4,19 @@ import dotenv from "dotenv"
 dotenv.config()
 import connectDb from "./database/connectDb.js"
 import userRouter from "./routes/user.route.js"
-
+import cookieParser from "cookie-parser";
 
 connectDb();
 
 const app =express();
 app.use(cors());
 app.use(express.json())
-
+app.use(cookieParser())
 const PORT = process.env.PORT || 4000;
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
+
 
 
 app.use("/api/v1/user" , userRouter)

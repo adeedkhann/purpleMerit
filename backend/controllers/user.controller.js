@@ -161,18 +161,21 @@ export const changeStatus = asyncHandler(async (req, res) => {
         new ApiResponse(200, updatedUser, "User updated successfully by Admin")
     );
 });
-
 export const logoutUser = asyncHandler(async (req, res) => {
-    const user = await User.findByIdAndUpdate(
-        req.user._id,
-        { $unset: { refreshToken: 1 } }, 
+    await User.findByIdAndUpdate(
+        req.user?._id,
+        { 
+            $set: { refreshToken: undefined } 
+        }, 
         { new: true }
     );
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: 'None' 
     };
+
     return res
         .status(200)
         .clearCookie("accessToken", options)
@@ -182,7 +185,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
 
 
 export const getUserDetails = asyncHandler(async (req, res) => {
-    const { userId } = req.params;
+   const userId = req.params.userId || req.user?._id;
     const user = await User.findById(userId).select("-password");
     if (!user) throw new ApiError(404, "User not found");
 
@@ -194,8 +197,8 @@ export const getUserDetails = asyncHandler(async (req, res) => {
 export const updateAccountDetails = asyncHandler(async(req, res) => {
     const { name, email } = req.body;
 
-    if (!name || !email) {
-        throw new ApiError(400, "Name and email are required");
+    if (!name && !email) {
+        throw new ApiError(400, "Name or email are required");
     }
 
     const user = await User.findByIdAndUpdate(
@@ -210,7 +213,6 @@ export const updateAccountDetails = asyncHandler(async(req, res) => {
 });
 
 export const refreshAccessToken = asyncHandler(async (req, res) => {
-    // 1. Extract token from Cookie or Body
     const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
 
     if (!incomingRefreshToken) {
@@ -218,26 +220,20 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 
     try {
-        // 2. Verify Token
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
         
-        // 3. Find User - MUST check if user exists before accessing properties
         const user = await User.findById(decodedToken?._id);
 
         if (!user) {
             throw new ApiError(401, "Invalid refresh token: User no longer exists");
         }
-
-        // 4. Safety Check (Requirement 3.2): Use optional chaining (?.)
         if (incomingRefreshToken !== user?.refreshToken) {
             throw new ApiError(401, "Refresh token is expired or already used");
         }
 
-        // 5. Generate new pair
         const accessToken = user.generateAccessToken();
         const newRefreshToken = user.generateRefreshToken();
 
-        // 6. Save new refresh token back to DB
         user.refreshToken = newRefreshToken;
         await user.save({ validateBeforeSave: false });
 

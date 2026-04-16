@@ -29,17 +29,17 @@ router.route("/me/update").patch(isAuthenticated, updateAccountDetails);
 router.route("/me/change-password").patch(isAuthenticated, changeCurrentPassword);
 
 //ADMIN & MANAGER ROUTES
-// Requirement 3.4: View paginated, searchable list 
+//View paginated, searchable list 
 // Managers are allowed to view users and update non-admins
 router.route('/all-users').get(isAuthenticated, authorizeRole('admin', 'manager'), getAllUser);
 
-// Requirement 3.4: View details of a single user
-router.route('/user/:userId').get(isAuthenticated, authorizeRole('admin', 'manager'), getUserDetails);
+//  View details of a single user
+router.route('/:userId').get(isAuthenticated, authorizeRole('admin', 'manager'), getUserDetails);
 
 // ADMIN ONLY ROUTES
-// Requirement 3.3: Only Admin can change roles or delete users
-router.route('/user/update-status').patch(isAuthenticated, authorizeRole('admin'), changeStatus);
+//  Only Admin can change roles or delete users
+router.route('/update-status').patch(isAuthenticated, authorizeRole('admin'), changeStatus);
 
-router.route('/user/delete/:userId').delete(isAuthenticated, authorizeRole('admin'), deleteUser);
+router.route('/delete/:userId').delete(isAuthenticated, authorizeRole('admin'), deleteUser);
 
 export default router;
