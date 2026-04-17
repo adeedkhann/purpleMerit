@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { register, reset } from '../features/auth/authSlice';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -10,16 +12,35 @@ const Register = () => {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isLoading } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) return setError("Passwords mismatch");
-    console.log("Submit:", formData);
+    if (formData.password !== formData.confirmPassword) {
+      return setError("Passwords mismatch");
+    }
+
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      role: formData.role,
+      status: formData.status
+    };
+
+    try {
+      await dispatch(register(payload)).unwrap();
+      dispatch(reset());
+      navigate('/login', { replace: true });
+    } catch (err) {
+      setError(typeof err === 'string' ? err : 'Registration failed');
+    }
   };
 
   return (
@@ -83,13 +104,13 @@ const Register = () => {
                 <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Status</label>
                 <select name="status" onChange={handleChange} className="w-full border-2 border-black bg-white p-2 text-xs font-black uppercase focus:outline-none">
                   <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="inActive">Inactive</option>
                 </select>
               </div>
             </div>
 
-            <button type="submit" className="w-full bg-black py-3 text-xs font-black tracking-[0.2em] text-white hover:bg-gray-800 uppercase">
-              Register Entity
+            <button disabled={isLoading} type="submit" className="w-full bg-black py-3 text-xs font-black tracking-[0.2em] text-white hover:bg-gray-800 uppercase disabled:cursor-not-allowed disabled:opacity-60">
+              {isLoading ? 'Registering...' : 'Register Entity'}
             </button>
           </form>
 

@@ -4,6 +4,11 @@ import { useDispatch } from 'react-redux';
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { login } from '../features/auth/authSlice';
 
+const getHomePath = (role) => {
+  if (role === 'admin' || role === 'manager') return '/admin/users';
+  return '/dashboard';
+};
+
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -11,7 +16,6 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -20,10 +24,16 @@ const Login = () => {
     if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Authorizing Entity:", formData);
-    dispatch(login(formData)); 
+
+    try {
+      const response = await dispatch(login(formData)).unwrap();
+      const role = response?.user?.role;
+      navigate(getHomePath(role), { replace: true });
+    } catch (err) {
+      setError(typeof err === 'string' ? err : 'Login failed');
+    }
   };
 
   return (
@@ -63,7 +73,7 @@ const Login = () => {
             <div className="space-y-1">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Password</label>
-                <button type="button" className="text-[9px] font-bold text-gray-400 hover:text-black uppercase">Forgot?</button>
+     
               </div>
               <div className="relative">
                 <input 
