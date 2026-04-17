@@ -10,6 +10,11 @@ const login = async (userData) => {
     return response.data.data; // Returns {user, accessToken, refreshToken}
 };
 
+const getCurrentUser = async () => {
+    const response = await api.get("/user/me");
+    return response.data.data;
+};
+
 const logout = async () => {
     const response = await api.post("/user/logout");
     return response.data;
@@ -18,6 +23,7 @@ const logout = async () => {
 const authService = {
     register,
     login,
+    getCurrentUser,
     logout,
 };
 

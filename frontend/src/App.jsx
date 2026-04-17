@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import ProtectedRoute from './middleware/ProtectedRoute';
 import Register from './pages/Register';
 import Login from './pages/Login';
@@ -8,6 +8,7 @@ import Profile from './pages/Profile';
 import UserManagement from './admin/UserManagement';
 import Navbar from './components/shared/Navbar';
 import Dashboard from './pages/Dashboard';
+import { restoreSession } from './features/auth/authSlice';
 
 const getHomePath = (role) => {
   if (role === 'admin' || role === 'manager') return '/admin/users';
@@ -36,6 +37,21 @@ const HomeRedirect = () => {
 };
 
 function App() {
+  const dispatch = useDispatch();
+  const { isHydrated } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    dispatch(restoreSession());
+  }, [dispatch]);
+
+  if (!isHydrated) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-white text-xs font-black uppercase tracking-[0.2em] text-black">
+        Restoring session...
+      </div>
+    );
+  }
+
   return (
     <div className="App">
       <Routes>

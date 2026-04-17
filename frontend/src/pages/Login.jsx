@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { login } from '../features/auth/authSlice';
 
@@ -18,6 +18,13 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user, isLoading } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user) {
+      navigate(getHomePath(user.role), { replace: true });
+    }
+  }, [navigate, user]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -94,10 +101,11 @@ const Login = () => {
             </div>
 
             <button 
+              disabled={isLoading}
               type="submit" 
-              className="w-full bg-black py-4 text-xs font-black tracking-[0.3em] text-white hover:bg-gray-800 transition-all uppercase active:scale-[0.98]"
+              className="w-full bg-black py-4 text-xs font-black tracking-[0.3em] text-white hover:bg-gray-800 transition-all uppercase active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Authorize Session
+              {isLoading ? 'Authorizing...' : 'Authorize Session'}
             </button>
           </form>
 

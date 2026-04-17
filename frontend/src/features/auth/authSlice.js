@@ -25,6 +25,24 @@ export const login = createAsyncThunk(
     }
 );
 
+export const restoreSession = createAsyncThunk(
+    "auth/restoreSession",
+    async (_, thunkAPI) => {
+        try {
+            return await authService.getCurrentUser();
+        } catch (error) {
+            const statusCode = error?.response?.status;
+
+            if (statusCode === 401 || statusCode === 403) {
+                return thunkAPI.rejectWithValue("No active session");
+            }
+
+            const message = error.response?.data?.message || error.message;
+            return thunkAPI.rejectWithValue(message);
+        }
+    }
+);
+
 export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
     try {
         return await authService.logout();
@@ -36,6 +54,7 @@ export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
 const initialState = {
     user: null, 
     isLoading: false,
+    isHydrated: false,
     isSuccess: false,
     isError: false,
     message: "",
@@ -82,6 +101,7 @@ const authSlice = createSlice({
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.isLoading = false;
+                state.isHydrated = true;
                 state.isSuccess = true;
                 state.user = action.payload.user;
             })
@@ -93,6 +113,30 @@ const authSlice = createSlice({
             })
             .addCase(logout.fulfilled, (state) => {
                 state.user = null;
+                state.isHydrated = true;
+            })
+            .addCase(restoreSession.pending, (state) => {
+                state.isLoading = true;
+                state.isError = false;
+                state.message = "";
+            })
+            .addCase(restoreSession.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isHydrated = true;
+                state.user = action.payload;
+            })
+            .addCase(restoreSession.rejected, (state, action) => {
+                state.isLoading = false;
+                state.isHydrated = true;
+                state.user = null;
+                // Do not block app when no valid session exists.
+                if (action.payload === "No active session") {
+                    state.isError = false;
+                    state.message = "";
+                    return;
+                }
+                state.isError = true;
+                state.message = action.payload;
             });
     },
 });
