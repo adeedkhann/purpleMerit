@@ -28,11 +28,11 @@ PORT=5000
 CORS_ORIGIN=[https://purple-merit-xi.vercel.app](https://purple-merit-xi.vercel.app)
 
 # Database
-MONGO_URI=mongodb+srv://adeedkhan:ummeed@cluster0.ggghui2.mongodb.net
+MONGO_URI= your mongo uri
 
 # Auth Secrets
-ACCESS_TOKEN_SECRET=0adeed00ADEED1508khan2004KhanKHAN1508
-REFRESH_TOKEN_SECRET=wfniofwgiwigwvwbeivw4g92gumi23ri
+ACCESS_TOKEN_SECRET== your access token secret 
+REFRESH_TOKEN_SECRET= your refresh token secret
 
 ```
 ### env for frontend
